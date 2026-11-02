@@ -1,4 +1,6 @@
 # Pocket-Watch
+<img width="1316" height="736" alt="Screenshot 2026-11-01 at 11 55 31 PM" src="https://github.com/user-attachments/assets/c9c14a70-1689-4a26-a353-8a7201ec76b1" />
+
 
 ## Description
 

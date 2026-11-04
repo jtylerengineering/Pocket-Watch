@@ -18,6 +18,7 @@
 #define DC D6
 #define CS D7
 #define BL D1
+#define photoPin 
 
 volatile int enCount = 0;
 
@@ -11307,6 +11308,14 @@ enum menuState {
     Tetroid
 };
 
+//adjustable backlight setup using the photoresistor
+float photoRead;
+float voltage;
+float resistance;
+float r2 = 330; //adjust for whatever your base resitor is (see schematic);
+float brightness;
+float brightnessRate;
+
 menuState currentScreen = Time_screen;
 //Menu Sprite Canvas
 #define canvasHeight 40
@@ -11338,12 +11347,27 @@ class MyServerCallbacks : public BLEServerCallbacks {
 };
 
 
-void 
+void BlAdjust(){
+	photoRead = analogRead(photoPin); //photoresistor is read
+	voltage = photoRead * (3.0/1023.0); //converts the analog signal to voltage
+	resistance = (r2 * voltage) / (3.3 - voltage); //reversing the voltage divider formula to get the resistance outputed by the photoresistor
+	brightnessRate = 255 / (R1 - 77); //for some reason the the max resistance I keep getting in testing is about 77 ohms
+	brightness = resistance * brightnessRate;
+
+	if(brightness < 0){
+		brightness = 1;
+	}
+	else if(brightness > 255){
+		brightness = 255;
+	}
+	else{}
+}
 
 void setup(){
     pinMode(rotA, INPUT_PULLUP);
     pinMode(rotB, INPUT_PULLUP);
     pinMode(en_SW, INPUT_PULLUP);
+	pinMode(photoPin, INPUT);
     pinMode(BL, OUTPUT);
 
     //encoder initialization
@@ -11369,12 +11393,10 @@ void setup(){
 }
 
 void loop(){
-int buttonState = digitalRead(en_SW);
-
-analogWrite(BL, 4);
-if(buttonState == HIGH && currentScreen == Time_screen) {
-    currentScreen = Menu;
-    tft.print(hour() ":" minute())
+	BlAdjust();
+	int buttonState = digitalRead(en_SW);
+	tft.fillScreen(BLACK);
+	tft.print(hour() ":" minute());
 }
 
 }
@@ -11382,7 +11404,7 @@ if(buttonState == HIGH && currentScreen == Time_screen) {
 void display(){
     switch(currentScreen){
         case Idle:
-            tft.fillScreen(ST77XX_Black)
+            tft.fillScreen(BLACK);
         break,
         case Time_screen:
 
